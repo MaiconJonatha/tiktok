@@ -1,2 +1,3 @@
-# tiktok
-Projeto criado pelo ArcanjoBot: Cria um app tipo TikTok.
+# TikTok Clone
+
+Um clone do aplicativo TikTok
