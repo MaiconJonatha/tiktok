@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SuperFlow TV</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; }
+.app { height: 100vh; position: relative; }
+.feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; }
+.feed::-webkit-scrollbar { display: none; }
+.video-card {
+  height: 100vh; width: 100%; position: relative;
+  scroll-snap-align: start; display: flex; align-items: center; justify-content: center;
+}
+.video-card:nth-child(1) { background: linear-gradient(135deg, #667eea, #764ba2); }
+.video-card:nth-child(2) { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.video-card:nth-child(3) { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.video-card:nth-child(4) { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.video-card:nth-child(5) { background: linear-gradient(135deg, #fa709a, #fee140); }
+.video-card:nth-child(6) { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+.video-card:nth-child(7) { background: linear-gradient(135deg, #ffecd2, #fcb69f); }
+.video-card:nth-child(8) { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); }
+.video-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 200px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); z-index: 1; }
+.video-info { position: absolute; bottom: 80px; left: 16px; right: 80px; z-index: 2; }
+.video-info .username { font-weight: 700; font-size: 16px; margin-bottom: 8px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.video-info .description { font-size: 14px; opacity: 0.9; line-height: 1.4; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.video-info .music { font-size: 13px; opacity: 0.7; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+.side-actions { position: absolute; right: 12px; bottom: 120px; display: flex; flex-direction: column; gap: 20px; align-items: center; z-index: 2; }
+.action-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.action-btn .icon { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; backdrop-filter: blur(10px); transition: transform 0.2s, background 0.2s; }
+.action-btn .icon:active { transform: scale(1.2); }
+.action-btn .icon.liked { background: #fe2c55; }
+.action-btn .count { font-size: 12px; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #fff; overflow: hidden; margin-bottom: 16px; background: #333; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #000; display: flex; justify-content: space-around; align-items: center; z-index: 10; border-top: 1px solid #222; }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; opacity: 0.5; font-size: 10px; }
+.nav-item.active { opacity: 1; }
+.nav-item .nav-icon { font-size: 22px; }
+.nav-create { width: 44px; height: 30px; background: linear-gradient(90deg, #25f4ee, #fe2c55); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; color: #fff; font-weight: 700; }
+.top-bar { position: fixed; top: 0; left: 0; right: 0; height: 50px; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 10; background: linear-gradient(rgba(0,0,0,0.5), transparent); }
+.top-bar span { font-size: 16px; font-weight: 600; opacity: 0.5; cursor: pointer; }
+.top-bar span.active { opacity: 1; border-bottom: 2px solid #fff; padding-bottom: 4px; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.music-disc { width: 36px; height: 36px; border-radius: 50%; background: #333; border: 8px solid #222; animation: spin 3s linear infinite; position: absolute; right: 12px; bottom: 90px; z-index: 2; }
+.splash { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s; }
+.splash.hide { opacity: 0; pointer-events: none; }
+.splash h1 { font-size: 36px; background: linear-gradient(90deg, #25f4ee, #fe2c55); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.splash p { opacity: 0.5; margin-top: 8px; font-size: 14px; }
+.big-emoji { font-size: 80px; opacity: 0.3; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+</style>
+</head>
+<body>
+<div class="splash" id="splash">
+  <h1>SuperFlow TV</h1>
+  <p>Powered by Opencrawsbuties</p>
+</div>
+<div class="app">
+  <div class="top-bar">
+    <span>Seguindo</span>
+    <span class="active">Para voce</span>
+    <span>Live</span>
+  </div>
+  <div class="feed" id="feed"></div>
+  <div class="bottom-nav">
+    <div class="nav-item active"><span class="nav-icon">🏠</span>Inicio</div>
+    <div class="nav-item"><span class="nav-icon">🔍</span>Buscar</div>
+    <div class="nav-create">+</div>
+    <div class="nav-item"><span class="nav-icon">💬</span>Inbox</div>
+    <div class="nav-item"><span class="nav-icon">👤</span>Perfil</div>
+  </div>
+</div>
+<script>
+const users = [
+  { name: '@superflow_tv', desc: 'Bem-vindo ao SuperFlow TV! A nova era do entretenimento digital 🎬', music: 'SuperFlow Original Sound', emoji: '🎬' },
+  { name: '@techguru', desc: 'Dica de programacao: aprenda React em 30 dias 💻🔥', music: 'Coding Vibes - Lo-Fi', emoji: '💻' },
+  { name: '@dancequeen', desc: 'Nova trend! Quem consegue fazer? 💃 #dance #viral', music: 'Anitta - Envolver', emoji: '💃' },
+  { name: '@cookmaster', desc: 'Receita de bolo em 1 minuto 🍰 Salva pra depois!', music: 'Cooking Time - Original', emoji: '🍰' },
+  { name: '@fitlife', desc: 'Treino de 5 min que FUNCIONA 💪🏋️ #fitness #gym', music: 'Workout Beat - Bass', emoji: '💪' },
+  { name: '@comedy_br', desc: 'Quando o codigo compila de primeira 😂😂', music: 'Meme Sound Effect', emoji: '😂' },
+  { name: '@travel_mundo', desc: 'Lugares que voce PRECISA conhecer 🌍 #travel', music: 'Around The World', emoji: '✈️' },
+  { name: '@artdigital', desc: 'Criei isso com IA em 10 segundos 🎨🤖 #ai #art', music: 'Creative Flow', emoji: '🎨' },
+];
+const feed = document.getElementById('feed');
+users.forEach((user, i) => {
+  const likes = Math.floor(Math.random() * 500) + 100;
+  const comments = Math.floor(Math.random() * 200) + 10;
+  const shares = Math.floor(Math.random() * 100) + 5;
+  const card = document.createElement('div');
+  card.className = 'video-card';
+  card.innerHTML =
+    '<div class="big-emoji">' + user.emoji + '</div>' +
+    '<div class="video-info">' +
+      '<div class="username">' + user.name + '</div>' +
+      '<div class="description">' + user.desc + '</div>' +
+      '<div class="music">🎵 ' + user.music + '</div>' +
+    '</div>' +
+    '<div class="side-actions">' +
+      '<div class="avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.name + '" alt=""></div>' +
+      '<div class="action-btn" onclick="toggleLike(this)">' +
+        '<div class="icon">❤️</div><span class="count">' + likes + 'K</span>' +
+      '</div>' +
+      '<div class="action-btn"><div class="icon">💬</div><span class="count">' + comments + '</span></div>' +
+      '<div class="action-btn"><div class="icon">↗️</div><span class="count">' + shares + '</span></div>' +
+      '<div class="action-btn"><div class="icon">🔖</div><span class="count">Salvar</span></div>' +
+    '</div>' +
+    '<div class="music-disc"></div>';
+  feed.appendChild(card);
+});
+function toggleLike(btn) {
+  btn.querySelector('.icon').classList.toggle('liked');
+}
+setTimeout(function() { document.getElementById('splash').classList.add('hide'); }, 1500);
+</script>
+</body>
+</html>
